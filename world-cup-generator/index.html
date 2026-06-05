@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>World Cup Random Draw</title>
+<style>
+body{font-family:Arial,sans-serif;max-width:1200px;margin:20px auto;padding:20px}
+.container{display:flex;gap:30px;align-items:flex-start}
+.panel{flex:1}
+textarea{width:100%;height:420px;box-sizing:border-box}
+button{padding:10px 18px;font-size:16px;margin-right:10px}
+table{border-collapse:collapse;width:100%;margin-top:20px}
+th,td{border:1px solid #ccc;padding:8px}
+th{background:#f2f2f2}
+.info{margin:15px 0;font-weight:bold}
+</style>
+</head>
+<body>
+
+<h1>Random Draw Generator</h1>
+<p>Enter any number of participants and countries. The counts must be equal (2, 8, 16, 24, 32, etc.).</p>
+
+<div class="container">
+  <div class="panel">
+    <h3>Participants</h3>
+    <textarea id="names"></textarea>
+  </div>
+
+  <div class="panel">
+    <h3>Countries</h3>
+    <textarea id="countries"></textarea>
+  </div>
+</div>
+
+<br>
+<button onclick="drawTeams()">Draw Teams</button>
+
+<div id="info" class="info"></div>
+<div id="results"></div>
+
+<script>
+function secureShuffle(array){
+    const arr=[...array];
+    for(let i=arr.length-1;i>0;i--){
+        const j=crypto.getRandomValues(new Uint32Array(1))[0]%(i+1);
+        [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+}
+
+function getLines(id){
+    return document.getElementById(id).value
+    .split(/\r?\n/)
+    .map(v=>v.trim())
+    .filter(v=>v.length>0);
+}
+
+function drawTeams(){
+    const names=getLines("names");
+    const countries=getLines("countries");
+
+    document.getElementById("info").innerHTML =
+      `Detected ${names.length} participants and ${countries.length} countries.`;
+
+    if(names.length===0 || countries.length===0){
+        alert("Please enter participants and countries.");
+        return;
+    }
+
+    if(names.length!==countries.length){
+        alert(`Counts must match. Found ${names.length} participants and ${countries.length} countries.`);
+        return;
+    }
+
+    const shuffled=secureShuffle(countries);
+
+    let html="<h2>Results</h2><table><tr><th>Participant</th><th>Country</th></tr>";
+
+    for(let i=0;i<names.length;i++){
+        html += `<tr><td>${names[i]}</td><td>${shuffled[i]}</td></tr>`;
+    }
+
+    html += "</table>";
+
+    document.getElementById("results").innerHTML=html;
+
+    document.getElementById("results").scrollIntoView({
+        behavior:"smooth"
+    });
+}
+</script>
+
+</body>
+</html>
